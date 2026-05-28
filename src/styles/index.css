@@ -265,7 +265,7 @@ body { min-height: 100vh; overflow-x: hidden; }
 .stat-card[data-tone="total"] .stat-value { color: var(--accent); }
 .stat-card[data-tone="not_started"] .stat-value { color: var(--amber); }
 .stat-card[data-tone="assigned"] .stat-value { color: var(--teal); }
-.stat-card[data-tone="overridden"] .stat-value { color: #6D28D9; }
+.stat-card[data-tone="overridden"] .stat-value { color: #6D28D9; font-size: 26px; letter-spacing: -0.02em; }
 .stat-card[data-tone="on_hold"] .stat-value { color: var(--orange); }
 .stat-card[data-tone="exception"] .stat-value { color: var(--danger); }
 

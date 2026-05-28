@@ -32,9 +32,11 @@ export function StatsGrid({ lang, counts, filter, setFilter, isBooking }: StatsG
   return (
     <div className="stats-grid">
       {STAT_DEFS.map(s => {
+        const isOverridden = s.tone === 'overridden';
         const trendKey = (isBooking ? 'bookingStats.trend.' : 'stats.trend.') + s.tone;
-        const trendText = s.tone === 'overridden'
-          ? t(lang, trendKey, { rate: overrideRate })
+        const mainValue = isOverridden ? `${overrideRate}%` : counts[s.countKey];
+        const trendText = isOverridden
+          ? t(lang, trendKey, { count: counts.overridden, total: overrideTotal })
           : t(lang, trendKey);
         return (
           <div
@@ -43,7 +45,7 @@ export function StatsGrid({ lang, counts, filter, setFilter, isBooking }: StatsG
             className={`stat-card ${filter === s.activeFilter && filter !== 'ALL' ? 'active' : ''}`}
             onClick={() => setFilter(filter === s.activeFilter ? 'ALL' : s.activeFilter)}
           >
-            <div className="stat-value">{counts[s.countKey]}</div>
+            <div className="stat-value">{mainValue}</div>
             <div className="stat-label">{t(lang, (isBooking ? 'bookingStats.' : 'stats.') + s.tone)}</div>
             <div className="stat-trend">{trendText}</div>
           </div>
