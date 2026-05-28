@@ -23,7 +23,7 @@ export const I18N = {
       status: 'Status', empty: 'No POs match the current filter.',
       ianSupplier: 'IAN {ian} · {supplier}', noCarrier: '—'
     },
-    status: { ASSIGNED: 'Pre-Assigned', NOT_STARTED: 'Not Started', ON_HOLD: 'On Hold', EXCEPTION: 'Exception', RUNNING: 'Running…' },
+    status: { ASSIGNED: 'Pre-Assigned', NOT_STARTED: 'Not Started', ON_HOLD: 'On Hold', EXCEPTION: 'Exception', RUNNING: 'Running…', MANUALLY_OVERRIDDEN: 'Overridden' },
     drawer: { title: 'Pre-Assign Trace Log', lane: 'Lane', container: 'Planned TEU', crdFob: 'CRD / FOB', ldd: 'LDD', pipeline: '5-Step Execution Pipeline', progress: 'Step {current}/5 · {pct}%', completed: '5/5 · 100%' },
     step: {
       pass: '✓ Pass', fail: '✗ Fail', skipped: '— Skipped', onHold: '⏸ On Hold', waiting: 'Waiting…', processing: 'Running logic check…',
@@ -111,7 +111,7 @@ export const I18N = {
       status: '状态', empty: '无符合当前筛选条件的 PO。',
       ianSupplier: 'IAN {ian} · {supplier}', noCarrier: '—'
     },
-    status: { ASSIGNED: '已预排船', NOT_STARTED: '未启动', ON_HOLD: '已暂缓', EXCEPTION: '异常', RUNNING: '执行中…' },
+    status: { ASSIGNED: '已预排船', NOT_STARTED: '未启动', ON_HOLD: '已暂缓', EXCEPTION: '异常', RUNNING: '执行中…', MANUALLY_OVERRIDDEN: '手动覆盖' },
     drawer: { title: '预排船执行日志', lane: '航线', container: '计划 TEU', crdFob: 'CRD / FOB', ldd: 'LDD', pipeline: '5 步执行流水线', progress: '步骤 {current}/5 · {pct}%', completed: '5/5 · 100%' },
     step: {
       pass: '✓ 通过', fail: '✗ 失败', skipped: '— 跳过', onHold: '⏸ 暂缓', waiting: '等待中…', processing: '逻辑判断中…',
@@ -199,7 +199,7 @@ export const I18N = {
       status: 'Status', empty: 'Keine POs entsprechen dem aktuellen Filter.',
       ianSupplier: 'IAN {ian} · {supplier}', noCarrier: '—'
     },
-    status: { ASSIGNED: 'Vorab-zugewiesen', NOT_STARTED: 'Nicht gestartet', ON_HOLD: 'Zurückgestellt', EXCEPTION: 'Ausnahme', RUNNING: 'Läuft…' },
+    status: { ASSIGNED: 'Vorab-zugewiesen', NOT_STARTED: 'Nicht gestartet', ON_HOLD: 'Zurückgestellt', EXCEPTION: 'Ausnahme', RUNNING: 'Läuft…', MANUALLY_OVERRIDDEN: 'Überschrieben' },
     drawer: { title: 'Vorab-Buchung Trace-Log', lane: 'Route', container: 'Geplante TEU', crdFob: 'CRD / FOB', ldd: 'LDD', pipeline: '5-stufige Ausführungspipeline', progress: 'Schritt {current}/5 · {pct}%', completed: '5/5 · 100%' },
     step: {
       pass: '✓ Bestanden', fail: '✗ Fehlgeschlagen', skipped: '— Übersprungen', onHold: '⏸ Zurückgestellt', waiting: 'Warten…', processing: 'Logikprüfung läuft…',

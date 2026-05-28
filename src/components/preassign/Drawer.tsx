@@ -6,7 +6,8 @@ import { buildTraceLog, TraceEntry } from '../../utils/traceBuilder';
 import { StatusPill } from '../common/StatusPill';
 import { TraceStep } from './TraceStep';
 import { AgentPrompt } from './AgentPrompt';
-import { IconClose, IconRefresh, IconSparkle, IconAlert } from '../icons/index';
+import { OverridePanel } from './OverridePanel';
+import { IconClose, IconRefresh, IconSparkle, IconAlert, IconEdit } from '../icons/index';
 
 interface AgentIntercept {
   type: 'crdLaterThanFob' | 'tooEarly';
@@ -28,11 +29,13 @@ interface DrawerProps {
   allocationUsage?: Record<string, { preassign: number; booked: number }>;
   initialAllocation?: Record<string, number>;
   agentIntercept?: AgentIntercept | null;
+  onOverride?: (data: { carrier: string; service: string; vessel: string; voyage: string; etd: string; eta: string }) => void;
 }
 
-export function Drawer({ po, open, onClose, runningStep, isLiveRun, onRerun, lang, onGoToException, allocationUsage, initialAllocation, agentIntercept }: DrawerProps) {
+export function Drawer({ po, open, onClose, runningStep, isLiveRun, onRerun, lang, onGoToException, allocationUsage, initialAllocation, agentIntercept, onOverride }: DrawerProps) {
   const trace = useMemo(() => po ? buildTraceLog(po, lang, allocationUsage, initialAllocation) : [], [po, lang, allocationUsage, initialAllocation]);
   const isLive = isLiveRun && runningStep !== null;
+  const [showOverride, setShowOverride] = useState(false);
   const progressPct = isLive
     ? Math.min(100, (runningStep - 1) / 5 * 100)
     : po
@@ -115,7 +118,22 @@ export function Drawer({ po, open, onClose, runningStep, isLiveRun, onRerun, lan
             />
           )}
 
-          {!isLive && !agentIntercept && po.status === 'ASSIGNED' && <ResultCardAssigned po={po} lang={lang} />}
+          {!isLive && !agentIntercept && po.status === 'ASSIGNED' && (
+            <>
+              <ResultCardAssigned po={po} lang={lang} />
+              {showOverride && onOverride && (
+                <OverridePanel
+                  po={po}
+                  lang={lang}
+                  onConfirm={(data) => { onOverride(data); setShowOverride(false); }}
+                  onCancel={() => setShowOverride(false)}
+                />
+              )}
+            </>
+          )}
+          {!isLive && !agentIntercept && po.status === 'MANUALLY_OVERRIDDEN' && (
+            <ResultCardOverridden po={po} lang={lang} />
+          )}
           {!isLive && !agentIntercept && po.status === 'ON_HOLD' && <ResultCardOnHold po={po} lang={lang} />}
           {!isLive && !agentIntercept && po.status === 'EXCEPTION' && <ResultCardException po={po} lang={lang} />}
         </div>
@@ -124,17 +142,41 @@ export function Drawer({ po, open, onClose, runningStep, isLiveRun, onRerun, lan
           {po.status === 'EXCEPTION' && onGoToException && (
             <button
               onClick={onGoToException}
-              className="px-3 py-1.5 text-xs font-medium bg-[#004F7C] text-white rounded hover:bg-[#337296] transition-colors"
+              className="px-3 py-1.5 text-xs font-medium border border-[#C5CFDB] rounded hover:bg-[#F8FAFC] transition-colors"
             >
               Resolve
             </button>
           )}
+          {(po.status === 'EXCEPTION' || po.status === 'ON_HOLD') && (
+            <button
+              onClick={onRerun}
+              className="px-3 py-1.5 text-xs font-medium bg-[#004F7C] text-white rounded hover:bg-[#337296] transition-colors flex items-center gap-1"
+            >
+              <IconRefresh /> Re-run
+            </button>
+          )}
+          {po.status === 'ASSIGNED' && !showOverride && onOverride && (
+            <button
+              onClick={() => setShowOverride(true)}
+              className="px-3 py-1.5 text-xs font-medium border border-[#E9D5FF] text-[#6D28D9] rounded hover:bg-[#F5F3FF] transition-colors flex items-center gap-1"
+            >
+              <IconEdit /> Override
+            </button>
+          )}
           {po.status === 'ASSIGNED' && (
+            <button
+              onClick={() => { setShowOverride(false); onRerun(); }}
+              className="px-3 py-1.5 text-xs font-medium border border-[#C5CFDB] rounded hover:bg-[#F8FAFC] transition-colors flex items-center gap-1"
+            >
+              <IconRefresh /> {t(lang, 'btn.rerun')}
+            </button>
+          )}
+          {po.status === 'MANUALLY_OVERRIDDEN' && (
             <button
               onClick={onRerun}
               className="px-3 py-1.5 text-xs font-medium border border-[#C5CFDB] rounded hover:bg-[#F8FAFC] transition-colors flex items-center gap-1"
             >
-              <IconRefresh /> {t(lang, 'btn.rerun')}
+              <IconRefresh /> Re-run AI
             </button>
           )}
           <button onClick={onClose} className="px-3 py-1.5 text-xs font-medium border border-[#C5CFDB] rounded hover:bg-[#F8FAFC] transition-colors">
@@ -211,6 +253,34 @@ function ResultCardException({ po, lang }: { po: PO; lang: Lang }) {
       <div className="text-xs text-[#0F1E2E] leading-relaxed">
         <strong>{t(lang, 'result.failedAtStep', { n: po.exceptionAtStep || 1 })}</strong>
         {t(lang, 'exceptionReasons.' + (po.exceptionKey || 'noSpace'))}
+      </div>
+    </motion.div>
+  );
+}
+
+function ResultCardOverridden({ po, lang }: { po: PO; lang: Lang }) {
+  const ts = po.overriddenAt ? new Date(po.overriddenAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  return (
+    <motion.div
+      className="bg-[#F5F3FF] border border-[#E9D5FF] rounded-lg p-4 mt-5"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <IconEdit />
+        <h4 className="text-sm font-bold text-[#6D28D9]">Manually Overridden</h4>
+        {po.overriddenBy && (
+          <span className="ml-auto text-[10px] text-[#8A98AB] font-mono">{po.overriddenBy} · {ts}</span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        <ResultItem label={t(lang, 'result.carrier')} value={po.carrier || ''} />
+        <ResultItem label={t(lang, 'result.service')} value={po.service || ''} />
+        <div className="col-span-2">
+          <ResultItem label={t(lang, 'result.vesselVoyage')} value={`${po.vessel} · ${po.voyage}`} />
+        </div>
+        <ResultItem label={t(lang, 'result.etd')} value={po.etd || ''} />
+        <ResultItem label={t(lang, 'result.eta')} value={po.eta || ''} />
       </div>
     </motion.div>
   );

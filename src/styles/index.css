@@ -441,6 +441,10 @@ tbody tr:last-child td { border-bottom: none; }
 .pill-error .pill-dot { background: var(--danger); }
 .pill-neutral { background: var(--bg3); color: var(--text2); border-color: var(--border); }
 
+/* Manual Override status */
+.pill-overridden { background: rgba(139, 92, 246, 0.12); color: #6D28D9; border-color: rgba(139,92,246,0.3); }
+.pill-overridden .pill-dot { background: #7C3AED; }
+
 /* Carrier Booking statuses */
 .pill-booked-exact { background: rgba(16, 185, 129, 0.14); color: #047857; border-color: rgba(16,185,129,0.35); }
 .pill-booked-exact .pill-dot { background: #10b981; }

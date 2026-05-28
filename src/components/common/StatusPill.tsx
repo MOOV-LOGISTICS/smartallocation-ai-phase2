@@ -10,6 +10,7 @@ const STATUS_TONE: Record<string, string> = {
   CONFIRMED: 'confirmed',
   BOOKED_EXACT: 'booked-exact',
   BOOKED_UPDATED: 'booked-updated',
+  MANUALLY_OVERRIDDEN: 'overridden',
 };
 
 interface StatusPillProps {

@@ -124,7 +124,7 @@ function computeAssignment(po: PO): PO {
 import './styles/index.css';
 
 export type Lang = 'en' | 'zh';
-export type POStatus = 'ASSIGNED' | 'NOT_STARTED' | 'ON_HOLD' | 'EXCEPTION' | 'RUNNING' | 'BOOKED_EXACT' | 'BOOKED_UPDATED';
+export type POStatus = 'ASSIGNED' | 'NOT_STARTED' | 'ON_HOLD' | 'EXCEPTION' | 'RUNNING' | 'BOOKED_EXACT' | 'BOOKED_UPDATED' | 'MANUALLY_OVERRIDDEN';
 
 export interface PreassignSnapshot {
   executedAt: string;
@@ -172,6 +172,8 @@ export interface PO {
   onHoldKey?: string;
   exceptionAtStep?: number;
   exceptionKey?: string;
+  overriddenBy?: string;
+  overriddenAt?: string;
   polRegion?: string;
   podRegion?: string;
   preassignSnapshot?: PreassignSnapshot;
@@ -236,7 +238,7 @@ function App() {
   const counts = useMemo(() => ({
     total: pos.length,
     not_started: pos.filter(p => p.status === 'NOT_STARTED').length,
-    assigned: pos.filter(p => p.status === 'ASSIGNED').length,
+    assigned: pos.filter(p => p.status === 'ASSIGNED' || p.status === 'MANUALLY_OVERRIDDEN').length,
     on_hold: pos.filter(p => p.status === 'ON_HOLD').length,
     exception: pos.filter(p => p.status === 'EXCEPTION').length
   }), [pos]);
@@ -330,6 +332,28 @@ function App() {
   };
 
   const handleRunPreAssign = (po: PO) => runPreAssignLive(po);
+
+  const handleOverride = (data: { carrier: string; service: string; vessel: string; voyage: string; etd: string; eta: string }) => {
+    if (!drawerPo) return;
+    const overridden: PO = {
+      ...drawerPo,
+      status: 'MANUALLY_OVERRIDDEN',
+      carrier: data.carrier,
+      service: data.service,
+      vessel: data.vessel,
+      voyage: data.voyage,
+      etd: data.etd,
+      eta: data.eta,
+      overriddenBy: 'z.dorothy',
+      overriddenAt: new Date().toISOString(),
+      exceptionAtStep: undefined,
+      exceptionKey: undefined,
+      onHoldKey: undefined,
+    };
+    setPos(prev => prev.map(p => p.id === overridden.id ? overridden : p));
+    setDrawerPo(overridden);
+    showToast(`${overridden.moovRef || overridden.lot} manually overridden by z.dorothy`, 'warning');
+  };
 
   const handleBatchRun = () => {
     const targets = selectedIds.size > 0
@@ -686,6 +710,7 @@ function App() {
         }}
         allocationUsage={allocationUsage}
         initialAllocation={INITIAL_ALLOCATION}
+        onOverride={handleOverride}
         agentIntercept={interceptModal ? {
           type: interceptModal.type,
           po: interceptModal.po,
