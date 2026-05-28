@@ -26,20 +26,29 @@ const STAT_DEFS = [
 ] as const;
 
 export function StatsGrid({ lang, counts, filter, setFilter, isBooking }: StatsGridProps) {
+  const overrideTotal = counts.assigned + counts.overridden;
+  const overrideRate = overrideTotal > 0 ? Math.round((counts.overridden / overrideTotal) * 100) : 0;
+
   return (
     <div className="stats-grid">
-      {STAT_DEFS.map(s => (
-        <div
-          key={s.tone}
-          data-tone={s.tone}
-          className={`stat-card ${filter === s.activeFilter && filter !== 'ALL' ? 'active' : ''}`}
-          onClick={() => setFilter(filter === s.activeFilter ? 'ALL' : s.activeFilter)}
-        >
-          <div className="stat-value">{counts[s.countKey]}</div>
-          <div className="stat-label">{t(lang, (isBooking ? 'bookingStats.' : 'stats.') + s.tone)}</div>
-          <div className="stat-trend">{t(lang, (isBooking ? 'bookingStats.trend.' : 'stats.trend.') + s.tone)}</div>
-        </div>
-      ))}
+      {STAT_DEFS.map(s => {
+        const trendKey = (isBooking ? 'bookingStats.trend.' : 'stats.trend.') + s.tone;
+        const trendText = s.tone === 'overridden'
+          ? t(lang, trendKey, { rate: overrideRate })
+          : t(lang, trendKey);
+        return (
+          <div
+            key={s.tone}
+            data-tone={s.tone}
+            className={`stat-card ${filter === s.activeFilter && filter !== 'ALL' ? 'active' : ''}`}
+            onClick={() => setFilter(filter === s.activeFilter ? 'ALL' : s.activeFilter)}
+          >
+            <div className="stat-value">{counts[s.countKey]}</div>
+            <div className="stat-label">{t(lang, (isBooking ? 'bookingStats.' : 'stats.') + s.tone)}</div>
+            <div className="stat-trend">{trendText}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
