@@ -436,6 +436,7 @@ function App() {
       total: bookingPos.length,
       not_started: bookingPos.filter(p => p.status === 'NOT_STARTED').length,
       booked: bookingPos.filter(p => BOOKED_STATUSES.includes(p.status as POStatus)).length,
+      overridden: bookingPos.filter(p => p.status === 'MANUALLY_OVERRIDDEN').length,
       exception: bookingPos.filter(p => p.status === 'EXCEPTION').length,
       exactMatch,
       withSnapshot: bookedTotal,
