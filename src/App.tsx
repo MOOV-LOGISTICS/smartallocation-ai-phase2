@@ -436,7 +436,7 @@ function App() {
       if (!usage[key]) usage[key] = { preassign: 0, booked: 0 };
       usage[key][type] += p.teu;
     };
-    pos.filter(p => p.status === 'ASSIGNED').forEach(p => accumulate(p, 'preassign'));
+    pos.filter(p => p.status === 'ASSIGNED' || p.status === 'MANUALLY_OVERRIDDEN').forEach(p => accumulate(p, 'preassign'));
     bookingPos.filter(p => p.status === 'BOOKED_EXACT' || p.status === 'BOOKED_UPDATED').forEach(p => accumulate(p, 'booked'));
     return usage;
   }, [pos, bookingPos]);
