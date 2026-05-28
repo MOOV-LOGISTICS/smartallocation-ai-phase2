@@ -7,6 +7,7 @@ interface StatsGridProps {
     total: number;
     not_started: number;
     assigned: number;
+    overridden: number;
     on_hold: number;
     exception: number;
   };
@@ -19,6 +20,7 @@ const STAT_DEFS = [
   { tone: 'total', countKey: 'total', activeFilter: 'ALL' },
   { tone: 'not_started', countKey: 'not_started', activeFilter: 'NOT_STARTED' },
   { tone: 'assigned', countKey: 'assigned', activeFilter: 'ASSIGNED' },
+  { tone: 'overridden', countKey: 'overridden', activeFilter: 'MANUALLY_OVERRIDDEN' },
   { tone: 'on_hold', countKey: 'on_hold', activeFilter: 'ON_HOLD' },
   { tone: 'exception', countKey: 'exception', activeFilter: 'EXCEPTION' }
 ] as const;

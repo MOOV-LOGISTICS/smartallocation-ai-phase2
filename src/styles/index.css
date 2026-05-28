@@ -228,7 +228,7 @@ body { min-height: 100vh; overflow-x: hidden; }
 .page { padding: 24px 32px 80px; }
 
 /* Stats Grid */
-.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 28px; }
+.stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 28px; }
 
 .stat-card {
   background: var(--surface);
@@ -249,6 +249,7 @@ body { min-height: 100vh; overflow-x: hidden; }
 .stat-card[data-tone="total"]::before { background: var(--accent); }
 .stat-card[data-tone="not_started"]::before { background: var(--amber); }
 .stat-card[data-tone="assigned"]::before { background: var(--teal); }
+.stat-card[data-tone="overridden"]::before { background: #7C3AED; }
 .stat-card[data-tone="on_hold"]::before { background: var(--orange); }
 .stat-card[data-tone="exception"]::before { background: var(--danger); }
 
@@ -264,6 +265,7 @@ body { min-height: 100vh; overflow-x: hidden; }
 .stat-card[data-tone="total"] .stat-value { color: var(--accent); }
 .stat-card[data-tone="not_started"] .stat-value { color: var(--amber); }
 .stat-card[data-tone="assigned"] .stat-value { color: var(--teal); }
+.stat-card[data-tone="overridden"] .stat-value { color: #6D28D9; }
 .stat-card[data-tone="on_hold"] .stat-value { color: var(--orange); }
 .stat-card[data-tone="exception"] .stat-value { color: var(--danger); }
 

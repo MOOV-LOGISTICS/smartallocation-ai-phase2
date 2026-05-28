@@ -238,7 +238,8 @@ function App() {
   const counts = useMemo(() => ({
     total: pos.length,
     not_started: pos.filter(p => p.status === 'NOT_STARTED').length,
-    assigned: pos.filter(p => p.status === 'ASSIGNED' || p.status === 'MANUALLY_OVERRIDDEN').length,
+    assigned: pos.filter(p => p.status === 'ASSIGNED').length,
+    overridden: pos.filter(p => p.status === 'MANUALLY_OVERRIDDEN').length,
     on_hold: pos.filter(p => p.status === 'ON_HOLD').length,
     exception: pos.filter(p => p.status === 'EXCEPTION').length
   }), [pos]);
