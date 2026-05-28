@@ -20,9 +20,9 @@ const STAT_DEFS = [
   { tone: 'total', countKey: 'total', activeFilter: 'ALL' },
   { tone: 'not_started', countKey: 'not_started', activeFilter: 'NOT_STARTED' },
   { tone: 'assigned', countKey: 'assigned', activeFilter: 'ASSIGNED' },
-  { tone: 'overridden', countKey: 'overridden', activeFilter: 'MANUALLY_OVERRIDDEN' },
   { tone: 'on_hold', countKey: 'on_hold', activeFilter: 'ON_HOLD' },
-  { tone: 'exception', countKey: 'exception', activeFilter: 'EXCEPTION' }
+  { tone: 'exception', countKey: 'exception', activeFilter: 'EXCEPTION' },
+  { tone: 'overridden', countKey: 'overridden', activeFilter: 'MANUALLY_OVERRIDDEN' }
 ] as const;
 
 export function StatsGrid({ lang, counts, filter, setFilter, isBooking }: StatsGridProps) {
