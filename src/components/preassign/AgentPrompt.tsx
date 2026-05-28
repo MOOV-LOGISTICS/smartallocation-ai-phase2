@@ -34,9 +34,10 @@ function weekLabel(weekStr: string): string {
 
 export function AgentPrompt({ type, po, lang, onModifyAndRun, onProceedAsIs, onCancel }: AgentPromptProps) {
   const fobMonday = weekMonday(po.fobWeek);
+  const today = new Date().toISOString().slice(0, 10);
   const [newCrd, setNewCrd] = useState(fobMonday);
   const bufferW = parseInt(po.fobWeek.split('/')[0]) - parseInt(po.crdWeek.split('/')[0]);
-  const crdValid = !!newCrd && newCrd <= fobMonday;
+  const crdValid = !!newCrd && newCrd >= today && newCrd <= fobMonday;
 
   return (
     <motion.div
@@ -74,6 +75,7 @@ export function AgentPrompt({ type, po, lang, onModifyAndRun, onProceedAsIs, onC
                 <input
                   type="date"
                   value={newCrd}
+                  min={today}
                   max={fobMonday}
                   onChange={e => setNewCrd(e.target.value)}
                   className="w-full px-3 py-1.5 border border-[#C5CFDB] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#004F7C] focus:border-transparent bg-white"

@@ -378,6 +378,7 @@ function App() {
     showToast(`${overridden.moovRef || overridden.lot} booking manually overridden by z.dorothy`, 'warning');
   };
 
+
   const handleBatchRun = () => {
     const targets = selectedIds.size > 0
       ? pos.filter(p => selectedIds.has(p.id) && p.status === 'NOT_STARTED')
