@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PO, Lang } from '../../App';
 import { t } from '../../i18n';
 import { buildTraceLog } from '../../utils/traceBuilder';
 import { StatusPill } from '../common/StatusPill';
 import { BookingTraceStep } from './BookingTraceStep';
-import { IconClose, IconRefresh, IconSparkle, IconAlert } from '../icons/index';
+import { OverridePanel } from '../preassign/OverridePanel';
+import { IconClose, IconRefresh, IconSparkle, IconAlert, IconEdit } from '../icons/index';
 
 interface BookingDrawerProps {
   po: PO | null;
@@ -16,14 +17,19 @@ interface BookingDrawerProps {
   onRerun: () => void;
   lang: Lang;
   onGoToException?: () => void;
+  onOverride?: (data: { carrier: string; service: string; vessel: string; voyage: string; etd: string; eta: string }) => void;
 }
 
-export function BookingDrawer({ po, open, onClose, runningStep, isLiveRun, onRerun, lang, onGoToException }: BookingDrawerProps) {
+export function BookingDrawer({ po, open, onClose, runningStep, isLiveRun, onRerun, lang, onGoToException, onOverride }: BookingDrawerProps) {
   const [activeTab, setActiveTab] = useState<'snapshot' | 'run'>('run');
+  const [showOverride, setShowOverride] = useState(false);
   const trace = useMemo(() => po ? buildTraceLog(po, lang) : [], [po, lang]);
   const isLive = isLiveRun && runningStep !== null;
 
-  const isBooked = po?.status === 'BOOKED_EXACT' || po?.status === 'BOOKED_UPDATED' || po?.status === 'ASSIGNED';
+  // Reset override panel when switching to a different PO
+  useEffect(() => { setShowOverride(false); }, [po?.id]);
+
+  const isBooked = po?.status === 'BOOKED_EXACT' || po?.status === 'BOOKED_UPDATED' || po?.status === 'ASSIGNED' || po?.status === 'MANUALLY_OVERRIDDEN';
   const progressPct = isLive
     ? Math.min(100, (runningStep - 1) / 5 * 100)
     : po
@@ -142,9 +148,40 @@ export function BookingDrawer({ po, open, onClose, runningStep, isLiveRun, onRer
                 <BookingTraceStep key={entry.step} entry={entry} currentStep={isLive ? runningStep : null} lang={lang} />
               ))}
 
-              {!isLive && po.status === 'BOOKED_EXACT' && <ResultCardBooked po={po} exact lang={lang} />}
-              {!isLive && po.status === 'BOOKED_UPDATED' && <ResultCardBooked po={po} exact={false} lang={lang} />}
-              {!isLive && po.status === 'ASSIGNED' && <ResultCardBooked po={po} exact={false} lang={lang} />}
+              {!isLive && po.status === 'BOOKED_EXACT' && (
+                <>
+                  <ResultCardBooked po={po} exact lang={lang} />
+                  {showOverride && onOverride && (
+                    <OverridePanel po={po} lang={lang}
+                      onConfirm={(data) => { onOverride(data); setShowOverride(false); }}
+                      onCancel={() => setShowOverride(false)}
+                    />
+                  )}
+                </>
+              )}
+              {!isLive && po.status === 'BOOKED_UPDATED' && (
+                <>
+                  <ResultCardBooked po={po} exact={false} lang={lang} />
+                  {showOverride && onOverride && (
+                    <OverridePanel po={po} lang={lang}
+                      onConfirm={(data) => { onOverride(data); setShowOverride(false); }}
+                      onCancel={() => setShowOverride(false)}
+                    />
+                  )}
+                </>
+              )}
+              {!isLive && po.status === 'ASSIGNED' && (
+                <>
+                  <ResultCardBooked po={po} exact={false} lang={lang} />
+                  {showOverride && onOverride && (
+                    <OverridePanel po={po} lang={lang}
+                      onConfirm={(data) => { onOverride(data); setShowOverride(false); }}
+                      onCancel={() => setShowOverride(false)}
+                    />
+                  )}
+                </>
+              )}
+              {!isLive && po.status === 'MANUALLY_OVERRIDDEN' && <ResultCardBookingOverridden po={po} />}
               {!isLive && po.status === 'ON_HOLD' && <ResultCardOnHold po={po} lang={lang} />}
               {!isLive && po.status === 'EXCEPTION' && <ResultCardException po={po} lang={lang} />}
             </>
@@ -169,9 +206,25 @@ export function BookingDrawer({ po, open, onClose, runningStep, isLiveRun, onRer
               Run Booking
             </button>
           )}
-          {isBooked && (
+          {(po.status === 'BOOKED_EXACT' || po.status === 'BOOKED_UPDATED' || po.status === 'ASSIGNED') && !showOverride && onOverride && (
             <button
-              onClick={onRerun}
+              onClick={() => setShowOverride(true)}
+              className="px-3 py-1.5 text-xs font-medium border border-[#E9D5FF] text-[#6D28D9] rounded hover:bg-[#F5F3FF] transition-colors flex items-center gap-1"
+            >
+              <IconEdit /> Override
+            </button>
+          )}
+          {po.status === 'MANUALLY_OVERRIDDEN' && (
+            <button
+              onClick={() => { setShowOverride(false); onRerun(); }}
+              className="px-3 py-1.5 text-xs font-medium border border-[#C5CFDB] rounded hover:bg-[#F8FAFC] transition-colors flex items-center gap-1"
+            >
+              <IconRefresh /> Re-run AI Booking
+            </button>
+          )}
+          {(po.status === 'BOOKED_EXACT' || po.status === 'BOOKED_UPDATED' || po.status === 'ASSIGNED') && (
+            <button
+              onClick={() => { setShowOverride(false); onRerun(); }}
               className="px-3 py-1.5 text-xs font-medium border border-[#C5CFDB] rounded hover:bg-[#F8FAFC] transition-colors flex items-center gap-1"
             >
               <IconRefresh /> Re-run
@@ -334,6 +387,36 @@ function ResultCardException({ po, lang }: { po: PO; lang: Lang }) {
       <div className="text-xs text-[#0F1E2E] leading-relaxed">
         <strong>{t(lang, 'result.failedAtStep', { n: po.exceptionAtStep || 1 })}</strong>
         {t(lang, 'exceptionReasons.' + (po.exceptionKey || 'noSpace'))}
+      </div>
+    </motion.div>
+  );
+}
+
+function ResultCardBookingOverridden({ po }: { po: PO }) {
+  const ts = po.overriddenAt
+    ? new Date(po.overriddenAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    : '';
+  return (
+    <motion.div
+      className="bg-[#F5F3FF] border border-[#E9D5FF] rounded-lg p-4 mt-5"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <IconEdit />
+        <h4 className="text-sm font-bold text-[#6D28D9]">Manually Booked</h4>
+        {po.overriddenBy && (
+          <span className="ml-auto text-[10px] text-[#8A98AB] font-mono">{po.overriddenBy} · {ts}</span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        <ResultItem label="Carrier" value={po.carrier || ''} />
+        <ResultItem label="Service" value={po.service || ''} />
+        <div className="col-span-2">
+          <ResultItem label="Vessel / Voyage" value={`${po.vessel} · ${po.voyage}`} />
+        </div>
+        <ResultItem label="ETD" value={po.etd || ''} />
+        <ResultItem label="ETA" value={po.eta || ''} />
       </div>
     </motion.div>
   );
